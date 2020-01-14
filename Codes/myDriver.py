@@ -57,8 +57,8 @@ def Jacobian_variational_formulation(param,
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
     ey = [0,1]
     
-    LNS  = inner(inner(u0, grad(uhat)), w) * dV
-    LNS += inner(inner(uhat, grad(u0)), w) * dV
+    LNS  = inner(grad(uhat)*u0, w) * dV
+    LNS += inner(grad(u0)*uhat, w) * dV
     LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dV
     LNS -= Prandtl*That*inner(ey,w)*dV
     LNS -= Prandtl*phat*div(w)*dV
@@ -72,6 +72,7 @@ def Jacobian_variational_formulation(param,
     
 def NavierStokes(param, u0,p0,T0,
                         w,q,theta):
+    
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
