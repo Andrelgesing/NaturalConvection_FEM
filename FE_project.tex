@@ -1,0 +1,313 @@
+\documentclass[12pt,a4paper]{scrartcl}
+\usepackage[top=2cm, bottom=3cm, left=2.4cm, right=2.4cm]{geometry}
+\usepackage{amsmath, amssymb,mathtools}\allowdisplaybreaks[1]
+\usepackage{bbm}
+%\usepackage{epsfig}
+
+\usepackage[toc,page]{appendix}
+\usepackage{color}
+\usepackage{mathrsfs}
+
+\usepackage{graphicx}
+%\usepackage{import}
+\usepackage{pgfplots}					% include tikz graphics
+\usetikzlibrary{fadings}%
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{decorations.markings}
+
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[round]{natbib}
+
+\usepackage{auto-pst-pdf}
+\usepackage{psfrag}
+\usepackage[FIGTOPCAP]{subfigure}
+\usepackage{amsmath} \allowdisplaybreaks[1]
+\usepackage{amsfonts}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{verbatim}
+\usepackage{rotating}
+\usepackage{tikz}
+\usepackage[colorlinks,citecolor=blue]{hyperref}
+
+\addtokomafont{caption}{\small}
+\setkomafont{captionlabel}{\sffamily\bfseries}
+\setcapindent{0em}
+
+%\newsavebox{\foobox}
+
+\sloppy
+\linespread{1.}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.9}
+\setcounter{topnumber}{3} \setcounter{bottomnumber}{3} \setcounter{totalnumber}{10}
+\newcounter{lno}
+
+\renewcommand{\vec}[1]{{\mbox{\boldmath $ #1 $}}}
+\newcommand{\vecs}[1]{{\mbox{\scriptsize\boldmath $ #1 $}}}
+\newcommand{\vecss}[1]{{\mbox{\tiny\boldmath $ #1 $}}}
+\newcommand{\ii}{\textrm{i}}
+\newcommand{\ee}{\textrm{e}}
+\newcommand{\dd}{\textrm{d}}
+\newcommand{\ov}[1]{\overline{ #1}}
+\newcommand{\br}[1]{\left\langle {#1} \right\rangle}
+\newcommand{\ddt}{\frac{\dd}{\dd t}}
+
+\newcommand{\dV}{\ \dd V }
+\newcommand{\dS}{\ \dd S }
+
+\newcommand{\lsim}{\ \genfrac{}{}{0pt}{1}{_{_{\scriptstyle <}}}{^{^{\scriptstyle \sim}}} \ }
+\newcommand{\gsim}{\ \genfrac{}{}{0pt}{1}{_{_{\scriptstyle >}}}{^{^{\scriptstyle \sim}}} \ }
+\newcommand{\N}{\mathbbm{N}}
+\newcommand{\Z}{\mathbbm{Z}}
+\newcommand{\Q}{\mathbbm{Q}}
+\newcommand{\R}{\mathbbm{R}}
+\newcommand{\C}{\mathbbm{C}}
+\newcommand{\I}{\mathbbm{I}}
+
+\def\Rey{\mbox{Re}}   % Reynolds number
+\def\Ri{\mbox{R}}    % Richardson number
+\def\sRey{\mbox{\scriptsize Re}}   % small Reynolds number
+\def\sRi{\mbox{\scriptsize R}}   % small Richardson number
+\def\Nb{\mbox{N}}   % Brunt-V\"{a}is\"{a}l\"{a} frequency
+\def\M{\mbox{M}}      % Mach number
+\def\Pe{\mbox{Pe}}    % Peclets number
+\def\Pran{\mbox{Pr}}  % Prandtl number, cf plain TeX's \Pr product
+\def\Gr{\mbox{Gr}}    % Grashof number
+\def\Ra{\mbox{Ra}}    % Rayleigh number
+\def\Nu{\mbox{Nu}}    % Nusselt number
+\def\St{\mbox{St}}    % Strouhal number
+\def\Kn{\mbox{Kn}}    % Knudsen number
+\def\Bo{\mbox{Bo}}    % Bond number
+\def\Ta{\mbox{T}}    % Taylor number
+\def\Bi{\mbox{Bi}}    % Biot number
+\def\Ma{\mbox{Ma}}    % Biot number
+
+% perturbation variables
+\newcommand{\up}{\vec{u}^\prime}
+\newcommand{\thetap}{\theta^\prime}
+\newcommand{\pp}{p^\prime}
+
+% base flow
+\newcommand{\ub}{\vec{u}_0}
+
+% modes variable
+\newcommand{\uhat}{\vec{\hat{u}}}
+\newcommand{\thetahat}{\hat{\theta}}
+\newcommand{\phat}{\hat{p}}
+\newcommand{\qhat}{\vec{\hat{q}}}
+
+% adjoint perturbation variables
+\newcommand{\qa}{\vec{q}^\dagger}
+\newcommand{\ua}{\vec{u}^\dagger}
+\newcommand{\pa}{p^\dagger}
+\newcommand{\thetaa}{\theta^\dagger}
+
+\graphicspath{{./figures/}}
+
+\begin{tikzfadingfrompicture}[name=custom fade]%
+\path(-0.2cm,0.2cm) rectangle (1.2cm,-2cm); % Arrow line is an overlay!
+\pgfinterruptboundingbox
+\draw[very thick,transparent!20,->] (0cm,0cm) .. controls +(0cm,-1cm) and +(0cm,1cm) .. (1cm,-2cm);
+\endpgfinterruptboundingbox
+\end{tikzfadingfrompicture}
+
+
+\begin{document}
+
+\begin{center}
+{\Large{Project 2: Natural convection in a differentially heated square cavity}}
+\end{center}
+\paragraph{Due Date:} Friday 24.01.2020 or before
+
+The aim of that project is to investigate the linear stability of the flow in a square of length L, subject to a
+temperature gradient imposed at its boundary. Using the Boussinesq equation the flow
+field will be computed by the mean of finite element method. After completing the partially blank codes, results will be compared with literature for different parameters.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\draw[style=help lines] (0,4) grid[step=2cm] (4,0);
+\fill [path fading=custom fade,
+      right color=blue!60!,
+      left color=orange!50!white,
+     ] (-0.4,-0.3) rectangle (4.4cm,0cm);
+\fill[path fading=custom fade,
+      right color=blue!60!,
+      left color=orange!50!white,
+     ] (-0.4,4.4) rectangle (4.0cm,4cm)node[pos=.5] {$T = 0.5-x, \vec u = \vec 0$};
+\fill[path fading=custom fade,
+      top color=orange!50!white,
+      bottom color=orange!50!white,
+     ] (0,0) rectangle (-0.4cm,4.4cm);
+\fill[path fading=custom fade,
+      top color=blue!60!,
+      bottom color=blue!60!,
+     ] (4.4,0.0) rectangle (4.0cm,4.4cm)    ;
+\draw[ultra thick] (0,0) rectangle (4cm,4cm);
+\draw [<->,very thick] (0,1.5) node (yaxis) [right] {$y$}
+        |- (1.5,0) node (xaxis) [above] {$x$}; 
+\draw[<->,very thick] (-0.6,0)  -- (-0.6,4)node (ltop)[midway, left]{$1$}; 
+\draw[<->,very thick] (0,-0.6)  -- (4,-0.6)node (lbit)[midway, below]{$1$}; 
+\end{tikzpicture}
+\caption{Problem setup and boundary conditions}
+\end{figure}
+
+
+\section{Preliminary Questions}
+
+We recall the Navier-Stokes equation, with the Oberbeck-Boussinesq approximation, written in dimensionless parameters
+\begin{align}\label{eq:NS}
+\frac{\partial  \vec u}{\partial t} + \left( \vec u\cdot \nabla \right)\vec u &= \Pran \left(-\nabla p + \frac{1}{\sqrt{\Ra}}\Delta \vec u + \vec e_y  T\right) \\
+\nabla \cdot \vec u &= 0 \nonumber\\
+\frac{\partial T}{\partial t}  + \vec u \cdot \nabla T &= \frac{1}{\sqrt{Ra}} \Delta T \nonumber
+\end{align}
+with the boundary conditions
+\begin{align}
+T &= x-1/2, \\
+\vec u &= \vec 0\text{.}
+\end{align}
+
+\subsection{Linearization}
+Let us define the baseflow $\vec q_0 = (\vec u_0 , p_0, T_0)^T$ which is the solution of the steady system of equation:
+\begin{align}\label{eq:SteadyNS}
+\left( \vec u_0\cdot \nabla \right)\vec u_0 &= \Pran \left(-\nabla p_0 + \frac{1}{\sqrt{\Ra}}\Delta \vec u_0 + \vec e_y  T_0\right) \\
+\nabla \cdot \vec u_0 &= 0 \nonumber \\
+ \vec u_0 \cdot \nabla T_0 &= \frac{1}{\sqrt{Ra}} \Delta T_0 \nonumber
+\end{align}
+Consider the total flow as sum of the baseflow and a perturbation: $\vec q = \vec q_0 + \epsilon\vec q'$ where $\epsilon \ll 1$  and $q'$ is of order 1.
+
+\begin{itemize}
+\item Insert the decomposition above in (\ref{eq:NS}) and using that $\epsilon \ll 1$, show that the linearised system of equation reads
+\begin{align}\label{eq:LNS}
+\frac{\partial  \vec u'}{\partial t} + \left( \vec u'\cdot \nabla \right)\vec u_0 + \left( \vec u_0\cdot \nabla \right)\vec u' &= \Pran \left(-\nabla p' + \frac{1}{\sqrt{\Ra}}\Delta \vec u' + \vec e_y  T'\right) \\
+\nabla \cdot \vec u &= 0 \nonumber \\
+\frac{\partial T'}{\partial t}  + \vec u_0 \cdot \nabla T' + \vec u' \cdot \nabla T_0 &= \frac{1}{\sqrt{Ra}} \Delta T' \nonumber
+\end{align}
+This system of equations correspond to the Jacobian of the system (\ref{eq:SteadyNS})
+\item What are the boundary conditions of the linearized system? 
+\item Show that the variational form of the linearized \textbf{Steady }Navier--Stokes equations reads
+\begin{align}\label{eq:LNS_varf}
+\int_V    \left(\vec u_0 \cdot \nabla  \right)\vec u'  \cdot \vec w   \ \dd V + \int_V \left(\vec u' \cdot \nabla  \right)\vec u_0 \cdot \vec w \ \dd V  + \frac{\Pran }{\sqrt{\Ra}}\int_V \nabla \vec u' \cdot \nabla \vec w \ \dd V & \\
+ - \Pran \int_V T' \vec e_y \cdot \vec w \ \dd V - \Pran \int_V  p' \ \mathrm{div} \vec w \ \dd V  - \Pran \int_V  q \ \mathrm{div} \vec u \ \dd V & \nonumber\\
++ \int_V \left(\vec u_0 \nabla  \right)\vec T'  \cdot \theta   \ \dd V + \int_V \left(\vec u'  \nabla  \right)\vec T_0 \cdot \theta \ \dd V +\frac{1}{\sqrt{\Ra}} \int_V \nabla \vec T' \cdot \nabla \theta \ \dd V & = 0 \nonumber
+\end{align}
+
+\end{itemize}
+
+
+\subsection{Newton Method}
+In the UE, the non linear problem was solved using the Newton method implemented in FEniCS. Here we propose to create our own Newton method algorithm.
+Recall that the Newton method reads
+\begin{equation}
+\vec q_0^{k+1} =  \vec q_0^{k} + \delta \vec q 
+\end{equation}
+where $\delta\vec q$ is the solution of the linear system of equation
+\begin{equation} \label{eq:NewtonMethod_linprob}
+\mathcal J(\vec q_0) \delta \vec q = -\mathcal F(\vec q_0)
+\end{equation}
+The Jacobian $\mathcal J$ is already known: it the linearized Navier--Stokes equations (\ref{eq:LNS_varf}) without the time dependence terms, and $\mathcal F(\vec q_0)$ is the variational formulation of the Navier--Stokes problem, \textit{i.e.} 
+\begin{align}\label{eq:NS_varf}
+\int_V    \left(\vec u_0 \cdot \nabla  \right)\vec u_0  \cdot \vec w   \ \dd V      + \frac{\Pran}{\sqrt{\Ra}}\int_V \nabla \vec u_0 \cdot \nabla \vec w \ \dd V & \\
+- \Pran\int_V T_0 \vec e_y \cdot \vec w \ \dd V  - \Pran\int_V  p_0 \ \mathrm{div} \vec w \ \dd V   - \Pran\int_V  q \ \mathrm{div} \vec u_0 \ \dd V & \nonumber \\
++ \int_V \left(\vec u_0 \cdot \nabla  \right)\vec T_0  \cdot \theta   \ \dd V  + \frac{1}{\sqrt{\Ra}}\int_V \nabla \vec T_0 \cdot \nabla \theta \ \dd V & = 0 \nonumber
+\end{align}
+
+
+The general algorithm is then
+\begin{enumerate}
+\item solve the linear problem (\ref{eq:NewtonMethod_linprob}) to get $\delta \vec q$
+\item evaluate $\epsilon_N = \vert\vert\delta \vec q \vert\vert_{L^2}$
+\item increment $\vec q_0$:
+\begin{equation}
+  \vec q_0^{k+1} =    \vec q_0^{k} + \alpha \delta \vec q_0
+\end{equation}
+where $\alpha \in [0,1]$ is a relaxation parameter: if $\alpha=1$ this amount to the normal Newton method, whereas a very low but non zero value will diminish the impact the of method (lower convergence rate, but potentially more stable).
+\item if $\epsilon_N< tol$ stop, otherewise go back to 1, where $tol$ is a chosen absolute tolerance, typically $10^{-6}$.
+\end{enumerate}
+
+
+\subsection{Linear Stability Analysis}
+In this section we want, like in the UE to quantify how stable is the flow. To that end we decompose the perturbation of Eq. \ref{eq:LNS} in normal modes:
+\begin{equation}
+\vec q' = \sum\limits_{i=1}^\infty \hat{\vec q}_i \mathrm{e}^{\lambda t} + \mathrm{complex}\ \mathrm{conjugate}
+\end{equation}
+where the $\hat{\vec q}_i$ denotes the $i$th mode associated with the growth rate $\lambda_i$. Injecting this decomposition in the linearized Navier--Stokes equations gives an eigenvalue problem
+\begin{equation}
+\mathcal J(\vec q_0)\, \hat{\vec q}_i = - \mathbf M\, \hat{\vec q}_i
+\end{equation}
+where $\mathcal J(\vec q_0) \, \hat{\vec q}_i$ is the same matrix as in the first part on Newton method,
+$\mathbf M$ is a mass matrix corresponding to the variable that are time dependent, \textit{i.e.} all except the pressure
+\begin{equation}
+-\mathbf{M}\,\hat{\vec q}_i = -\begin{pmatrix}
+1 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 1 
+\end{pmatrix}
+\begin{pmatrix}
+\hat{\vec u}_i \\
+\hat{p}_i\\
+\hat{T}
+\end{pmatrix}
+\end{equation}
+The variational form associated to this matrix vector product is then nothing else than
+\begin{equation}
+-\int_V \hat{\vec u}_i \cdot \vec w + \hat{T}_i\,\theta  \  \dd V
+\end{equation}
+
+\section{Coding Aspects}
+\subsection{Mesh Generation}
+Using the codes given in the UE (3rd one with FE), implement the function \texttt{generate\_mesh(N)} that generates a $20 \times 20$ unitary mesh, and then refine it at  5\%, 1\%, and 0.5\% of the cavity length away from the wall. Then plot the mesh with the command \texttt{plot(mesh)}.
+\subsection{Newton Method}
+\begin{enumerate}
+\item Complete the function called \texttt{Jacobian\_variational\_formulation} \label{task_Jacobian}. It should output the variational form of the \textbf{Linearized }Navier--Stokes equations. 
+\item Complete the function called \texttt{NavierStokes}. It should out the variational form of the Navier--Stokes equations.
+\item Complete the function called \texttt{solve\_newton\_step}, which call the two function implemented in the first and second steps, then solve the linear problem (\ref{eq:NewtonMethod_linprob}) and add the increment to the solution vector (eventually with a relaxation).
+\item Complete the function called \texttt{solve\_newton}, which calls the function implemented in the third step, computes the $\epsilon_N$ and loops while it is larger than $10^{-6}$
+\end{enumerate}
+
+To reach high Rayleigh number values ($\Pran=0.71$, $\Ra > 10^5$) one needs to ramp up progressively: for that case you can for instance run $\Ra =[10^4,10^5,10^6,2\times10^6]$. 
+
+\subsection{Linear Stability Analysis}
+\begin{table}
+\caption{Critical Rayleigh numbers for Prandtl numbers $\Pran = 0.71$,$\Pran = 0.015$ (water and mercury). } \label{tab:Critical}
+\centering
+\begin{tabular}{c|c|cc}
+Method & mesh & $Pr$ & $\Ra_c$ \\
+\hline
+\begin{tabular}{@{}c@{}}Finite Difference \\ second order in time\end{tabular}  & stretched $80\times 80$ & $0.71$ & $2.101 \times 10^6$ \\
+Spectral Method & $20\times 20$ & $0.71$ & $2.110 \times 10^6$\\
+Spectral Method & $30\times 30$ & $0.71$ & $2.108 \times 10^6$ \\
+\hline
+Spectral Method & $20\times 20$ & $0.015$ & $44580$\\
+Spectral Method & $30\times 30$ & $0.015$ & $40695$  
+%Spectral Method & $20\times 20$ & $7.0$  & $4.9\times 10^6$\\
+%Spectral Method & $30\times 30$ & $7.0$  & $5.6924\times 10^6$
+\end{tabular}
+
+\end{table}
+\begin{enumerate}
+\item Complete the function called \texttt{Compute\_eigenvalues}: you have to write the variational forms and one of them has already been implemented in  \ref{task_Jacobian}.
+\item The stability boundary is characterised by having the largest eigenvalue having a zero real part. Using \verb|N = 20|, \verb|order = 2| as parameters, bracket the critical Rayleigh number $\Ra_c$ at which the eigenvalue is zero up to the second digit, for $\Pran = 0.71$ and $\Pran = 0.015$, and compare with the result from litterature which are summed up in the table \ref{tab:Critical}.
+\item How does the stability boundary changes with increase of the polynomial order?
+\item Compare with the results you had in the first project (The case with the higher Prandtl number can still have a mismatch).
+\end{enumerate}
+\subsection{General questions}
+\begin{enumerate}
+
+\item Is the implementation stable is the polynomial order for pressure is the same as the polynomial order for the velocity? What is the condition for numerical stability called? 
+\item On which functional space do the velocity live? 
+\item Which other kind of algorithm could we have used to compute the Steady flow? Give an example.
+\item How is the time required by your computer evolving as the polynomial order increases?
+\item Was it longer with you Finite Difference code to see whether the flow was stable/instable for a given Rayleigh number?
+\item Do you think it would be possible to solve the eigenvalue problem for a 3D flow with \texttt{scipy}'s \texttt{eigs} (Do not do it!)?
+
+\end{enumerate}
+
+
+
+
+\end{document}

@@ -1,0 +1,36 @@
+
+The python scripts are partially filled, the general structure of the files is the following
+
+loadParam.py: 
+ - class in which the parameters are defined (Rayleigh,Prandtl,Number of nodes on the side before refinement ...)
+ - Boundary conditions for 
+   1) Navier-Stokes (non zero temperature)
+   2) the linearized Navier-Stokes
+   both BC need to be implemented
+   
+myDriver.py:
+Many functions are defined here.
+The functions that you need to implement are
+
+generate_mesh
+refine_mesh_close_to_borders
+
+Jacobian_variational_form
+NavierStokes
+solve_newton_step
+solve_newton
+
+solveEigenvalueProblem
+
+There are some other tool functions you may want to use/modify ...
+plot_streamlines_and_isotemperature
+
+
+
+
+
+
+
+
+
+
