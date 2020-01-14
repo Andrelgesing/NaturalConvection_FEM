@@ -55,7 +55,7 @@ def Jacobian_variational_formulation(param,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
-    ey = [0,1]
+    ey              = [0,1]
     
     LNS  = inner(grad(uhat)*u0, w) * dV
     LNS += inner(grad(u0)*uhat, w) * dV
@@ -71,14 +71,19 @@ def Jacobian_variational_formulation(param,
     return LNS
     
 def NavierStokes(param, u0,p0,T0,
-                        w,q,theta):
-    
+                        w,q,theta):  
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
+    ey              =  [0,1]
     
-    # NS  = ...
-    # NS += ...
+    NS  = inner(grad(u)*u0, w) * dV
+    NS += Prandtl*one_over_sqrtRA* inner(grad(u),grad(w))*dV
+    NS -= Prandtl*That*inner(ey,w)*dV
+    NS -= Prandtl*p0*div(w)*dV
+    NS -= Prandtl*q*div(u0)*dV
+    NS += inner(grad(T0)*u0,theta)*dV
+    NS += one_over_sqrtRA*inner(grad(T0),grad(theta))*dV
     
     raise ValueError("NavierStokes variational formulation has not been implemented ...")   
     return NS                           
@@ -103,8 +108,8 @@ def solve_newton_step(mymesh,param,q0,W):
     
    
     # Define variational forms
-    # LNS = ...
-    # NS  = ...
+    LNS = Jacobian_variational_formulation( param, u0, p0, T0 ,uhat, phat, That, w , q, theta  )
+    NS  = NavierStokes(param, u0, p0, T0, w, q, theta)
     
     # Assemble matrix, vector
     # lhs  = ...
@@ -157,7 +162,7 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
     (u0, p0 , T0) = (as_vector((q0[0], q0[1])), q0[2],q0[3])
                  
     # Define variational forms
-    # LNS =  ...
+    LNS =  Jacobian_variational_formulation( param, u0, p0, T0 ,uhat, phat, That, w , q, theta  )
     # m   =  ...
     
     raise ValueError("Variational forms form the eigenvalue problem are not implemented yet")
