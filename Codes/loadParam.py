@@ -35,19 +35,20 @@ class Param():
 
     def define_boundary_conditions_LNS(self,W):
         # for the velocity
-        # self.bc0 = DirichletBC(W.sub(0), ...  ,Walls())
+        self.bc0 = DirichletBC(W.sub(0), Constant((0.0, 0.0)), Walls())
         # this is the temperature
-        # self.bc1 = DirichletBC(W.sub(2), ... , Walls())
-        #self.bc = [self.bc0,self.bc1]  
-        raise ValueError('LNS boundary conditions not implemented')
+        self.T0  = Constant
+        self.bc1 = DirichletBC(W.sub(2), Constant(0.0), Walls())
+        self.bc = [self.bc0,self.bc1]
+        # raise ValueError('LNS boundary conditions not implemented')
         
     def define_boundary_conditions(self,W):
         # for the velocity
-        #bc0 = DirichletBC(W.sub(0), ...   ,Walls())
+        bc0 = DirichletBC(W.sub(0), Constant((0.0, 0.0)), Walls())
         # this is the temperature
-        #bc1 = DirichletBC(W.sub(2), Expression(...), Walls())
-        bc = [bc0,bc1]  
-        raise ValueError('NS boundary conditions not implemented')
+        bc1 = DirichletBC(W.sub(2),  Expression('x[0]-0.5', degree=1), Walls())
+        bc = [bc0, bc1]
+        # raise ValueError('NS boundary conditions not implemented')
         return bc
 
  
