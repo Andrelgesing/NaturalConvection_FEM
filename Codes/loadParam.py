@@ -14,15 +14,12 @@ class Param():
         # physical parameters
         #self.Rayleigh = 2.108e6 
         self.Rayleigh = 2.0e6        
-        self.Prandtl  = 0.71 
-        
-        #self.Rayleigh = 45000        
-        #self.Prandtl  = 0.015
+        self.Prandtl  = 0.71
         
         
         # number of triangles per side, before refinement
         self.N = 20
-        self.order=  3
+        self.order = 3
         
         # --- parameters for the Newton method ---
         # relaxation parameter 
@@ -39,7 +36,7 @@ class Param():
         # this is the temperature
         self.T0  = Constant
         self.bc1 = DirichletBC(W.sub(2), Constant(0.0), Walls())
-        self.bc = [self.bc0,self.bc1]
+        self.bc = [self.bc0, self.bc1]
         # raise ValueError('LNS boundary conditions not implemented')
         
     def define_boundary_conditions(self,W):
