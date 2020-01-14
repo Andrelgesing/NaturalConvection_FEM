@@ -1,13 +1,12 @@
 from dolfin import *
 from loadParam import *
-import numpy as np
+from scipy.sparse.linalg import eigs 
+from __future__ import print_function
 import matplotlib.pyplot as plt
 import scipy.sparse as sp                                                                      
-import numpy as np                                                                             
-from scipy.sparse.linalg import eigs 
+import numpy as np  
 import timeit
-
-
+import mshr
 
 
 class Walls(SubDomain):
@@ -15,8 +14,25 @@ class Walls(SubDomain):
         return on_boundary 
 
 def refine_mesh_close_to_borders(mesh):
-    # refine sucessively the mesh at 5%, 1%, 0.5%
-    raise ValueError("Mesh Refinement has not been implemented")
+   
+    alpha_v = [ 0.05, 0.01, 0.005 ]
+
+    for alpha in alpha_v:
+        cell_markers = MeshFunction("bool", mesh, 2)
+        cell_markers.set_all(False)
+
+        for cell in cells(mesh):
+                x = cell.midpoint()[0]
+                y = cell.midpoint()[1]
+                # cond = near(x,0.0001, alpha) or near(x,0.9999, alpha) or near(y,0.0001, alpha) or near(y,0.9999, alpha)
+                cond = (x < alpha) or (y < alpha) or (x > 0.9999-alpha) or (y > 0.9999-alpha)
+                if cond :
+                    cell_markers[cell] = True
+
+        print("refining mesh: former number of vertices: ",mesh.coordinates().size)
+        mesh = refine(mesh, cell_markers , redistribute = False)
+        print("               number of vertices: ",mesh.coordinates().size)
+        
     return mesh
 
 def generate_mesh(param):
@@ -31,8 +47,6 @@ def load_mesh(param):
     mesh_ = Mesh("./Mesh/mesh.xml")
     return mesh_
 
-
-
 def Jacobian_variational_formulation(param, 
                                      u0, p0, T0 ,
                                      uhat, phat, That,
@@ -41,12 +55,19 @@ def Jacobian_variational_formulation(param,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
+    ey = [0,1]
     
-    # LNS  = ...
-    # LNS += ...
+    LNS  = inner(inner(u0, grad(uhat)), w) * dV
+    LNS += inner(inner(uhat, grad(u0)), w) * dV
+    LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dV
+    LNS -= Prandtl*That*inner(ey,w)*dV
+    LNS -= Prandtl*phat*div(w)*dV
+    LNS -= Prandtl*q*div(u0+uhat)*dV
+    LNS += inner(u0*grad(That),theta)*dV
+    LNS += inner(uhat*grad(T0),theta)*dV
+    LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dV
+    
     raise ValueError("LNS form has not been implemented")
-    
-    
     return LNS
     
 def NavierStokes(param, u0,p0,T0,
@@ -54,8 +75,10 @@ def NavierStokes(param, u0,p0,T0,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
+    
     # NS  = ...
     # NS += ...
+    
     raise ValueError("NavierStokes variational formulation has not been implemented ...")   
     return NS                           
                        
