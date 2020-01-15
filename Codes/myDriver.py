@@ -112,16 +112,20 @@ def solve_newton_step(mymesh,param,q0,W):
     NS  = NavierStokes(param, u0, p0, T0, w, q, theta)
     
     # Assemble matrix, vector
-    lhs  = assemble(LNS)
-    rhs  = assemble(NS)
+    # lhs  = assemble(LNS)
+    # rhs  = assemble(NS)
     
     # apply LNS boundary conditions (see loadParam.py)...
-    bcs = param.bc
     # bc.apply ...
+    bcs = param.define_boundary_conditions_LNS(W)
+    for bc in bcs:
+        bc.apply(dq.vector())
+        # bc.apply(q0.vector())
+
     
     # solve the linear system of equations
     # solve() ...
-    solve(LNS == NS, w, bcs, solver_parameters={
+    solve(LNS ==  NS, q0, bcs, solver_parameters={
         "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
     # increment the solution vector with a potential relaxation factor     
     # q0.vector()[:] =  q0.vector().get_local() + ... 
@@ -133,7 +137,7 @@ def solve_newton_step(mymesh,param,q0,W):
 
 
 def solve_newton(mymesh,param,q0,W):
-    solve_newton_step(mymesh, param, q0, W)
+    q0,dq = solve_newton_step(mymesh, param, q0, W)
     # epsilon_N = 2*param.tolerance
     # i= 0
     # while epsilon_N > param.tolerance:
