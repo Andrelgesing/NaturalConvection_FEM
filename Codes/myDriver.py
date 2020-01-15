@@ -1,7 +1,7 @@
+from __future__ import print_function
 from dolfin import *
 from loadParam import *
-from scipy.sparse.linalg import eigs 
-from __future__ import print_function
+from scipy.sparse.linalg import eigs
 import matplotlib.pyplot as plt
 import scipy.sparse as sp                                                                      
 import numpy as np  
@@ -55,19 +55,19 @@ def Jacobian_variational_formulation(param,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
-    ey              = [0,1]
-    
+    ey              = as_vector([0,1])
+    dV = dx
     LNS  = inner(grad(uhat)*u0, w) * dV
     LNS += inner(grad(u0)*uhat, w) * dV
     LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dV
     LNS -= Prandtl*That*inner(ey,w)*dV
     LNS -= Prandtl*phat*div(w)*dV
     LNS -= Prandtl*q*div(u0+uhat)*dV
-    LNS += inner(u0*grad(That),theta)*dV
-    LNS += inner(uhat*grad(T0),theta)*dV
+    LNS += inner(u0,grad(That))*theta*dV
+    LNS += inner(uhat,grad(T0))*theta*dV
     LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dV
     
-    raise ValueError("LNS form has not been implemented")
+    # raise ValueError("LNS form has not been implemented")
     return LNS
     
 def NavierStokes(param, u0,p0,T0,
@@ -75,17 +75,17 @@ def NavierStokes(param, u0,p0,T0,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)    
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))  
-    ey              =  [0,1]
-    
-    NS  = inner(grad(u)*u0, w) * dV
-    NS += Prandtl*one_over_sqrtRA* inner(grad(u),grad(w))*dV
-    NS -= Prandtl*That*inner(ey,w)*dV
+    ey              =  as_vector([0,1])
+    dV = dx
+    NS  = inner(grad(u0)*u0, w) * dV
+    NS += Prandtl*one_over_sqrtRA* inner(grad(u0),grad(w))*dV
+    NS -= Prandtl*T0*inner(ey,w)*dV
     NS -= Prandtl*p0*div(w)*dV
     NS -= Prandtl*q*div(u0)*dV
-    NS += inner(grad(T0)*u0,theta)*dV
+    NS += inner(grad(T0),u0)*theta*dV
     NS += one_over_sqrtRA*inner(grad(T0),grad(theta))*dV
     
-    raise ValueError("NavierStokes variational formulation has not been implemented ...")   
+    # raise ValueError("NavierStokes variational formulation has not been implemented ...")
     return NS                           
                        
 
@@ -112,36 +112,38 @@ def solve_newton_step(mymesh,param,q0,W):
     NS  = NavierStokes(param, u0, p0, T0, w, q, theta)
     
     # Assemble matrix, vector
-    # lhs  = ...
-    # rhs  = ...
+    lhs  = assemble(LNS)
+    rhs  = assemble(NS)
     
     # apply LNS boundary conditions (see loadParam.py)...
+    bcs = param.bc
     # bc.apply ...
     
     # solve the linear system of equations
     # solve() ...
-    
+    solve(LNS == NS, w, bcs, solver_parameters={
+        "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
     # increment the solution vector with a potential relaxation factor     
     # q0.vector()[:] =  q0.vector().get_local() + ... 
     
-    raise ValueError("solve_newton_step not implemented")
+    # raise ValueError("solve_newton_step not implemented")
                  
     return q0,dq
     
 
 
 def solve_newton(mymesh,param,q0,W):
-    
-    epsilon_N = 2*param.tolerance
-    i= 0
-    while epsilon_N > param.tolerance:
-        # - newton step
-        
-        # evaluation of the residual epsilon_N = L2 norm of dq ...
-        
-        raise ValueError("solve_newton not implemented")
-        print("      step %d\t,eps = %g"%(i,epsilon_N))
-        i+=1    
+    solve_newton_step(mymesh, param, q0, W)
+    # epsilon_N = 2*param.tolerance
+    # i= 0
+    # while epsilon_N > param.tolerance:
+    #     # - newton step
+    #
+    #     # evaluation of the residual epsilon_N = L2 norm of dq ...
+    #
+    #     raise ValueError("solve_newton not implemented")
+    #     print("      step %d\t,eps = %g"%(i,epsilon_N))
+    #     i+=1
         
         
 def solveEigenvalueProblem(mymesh,param,q0,W):
