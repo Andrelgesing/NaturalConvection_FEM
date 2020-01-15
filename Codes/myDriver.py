@@ -62,7 +62,7 @@ def Jacobian_variational_formulation(param,
     LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dV
     LNS -= Prandtl*That*inner(ey,w)*dV
     LNS -= Prandtl*phat*div(w)*dV
-    LNS -= Prandtl*q*div(u0+uhat)*dV
+    # LNS -= Prandtl*q*div(u0+uhat)*dV
     LNS += inner(u0,grad(That))*theta*dV
     LNS += inner(uhat,grad(T0))*theta*dV
     LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dV
@@ -126,9 +126,10 @@ def solve_newton_step(mymesh,param,q0,W):
     # solve the linear system of equations
     # solve() ...
 
-    solve(LNS == NS, dq, bcs, solver_parameters={
+    solve(NS == 0, q0, bcs, solver_parameters={
         "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-
+    # solve(NS == LNS, dq, bcs, solver_parameters={
+    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
     # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
     #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
 
