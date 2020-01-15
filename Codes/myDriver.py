@@ -112,8 +112,8 @@ def solve_newton_step(mymesh,param,q0,W):
     NS  = NavierStokes(param, u0, p0, T0, w, q, theta)
     
     # Assemble matrix, vector
-    # lhs  = assemble(LNS)
-    # rhs  = assemble(NS)
+    lhs_ = lhs(LNS + NS)
+    rhs_ = rhs(LNS + NS)
     
     # apply LNS boundary conditions (see loadParam.py)...
     # bc.apply ...
@@ -125,8 +125,25 @@ def solve_newton_step(mymesh,param,q0,W):
     
     # solve the linear system of equations
     # solve() ...
-    solve(LNS ==  NS, q0, bcs, solver_parameters={
+
+    solve(LNS == NS, dq, bcs, solver_parameters={
         "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
+
+    # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
+    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
+
+    # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
+    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
+
+    # problem = NonlinearVariationalProblem(LNS, dq, bcs, NS)
+    # solver = NonlinearVariationalSolver(problem)
+    # prm = solver.parameters
+    # # prm['newton_solver']['absolute_tolerance'] = 1E-8
+    # # prm['newton_solver']['relative_tolerance'] = 1E-7
+    # prm['newton_solver']['maximum_iterations'] = 1000
+    # prm['newton_solver']['relaxation_parameter'] = 1e-0
+    # solver.solve()
+
     # increment the solution vector with a potential relaxation factor     
     # q0.vector()[:] =  q0.vector().get_local() + ... 
     
