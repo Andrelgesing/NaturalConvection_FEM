@@ -56,16 +56,15 @@ def Jacobian_variational_formulation(param,
     Rayleigh        =  Constant(param.Rayleigh)
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))
     ey              = as_vector([0,1])
-    dV = dx
-    LNS  = inner(grad(uhat)*u0, w) * dV
-    LNS += inner(grad(u0)*uhat, w) * dV
-    LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dV
-    LNS -= Prandtl*That*inner(ey,w)*dV
-    LNS -= Prandtl*phat*div(w)*dV
-    # LNS -= Prandtl*q*div(u0+uhat)*dV
-    LNS += inner(u0,grad(That))*theta*dV
-    LNS += inner(uhat,grad(T0))*theta*dV
-    LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dV
+    LNS  = inner(u0, grad(uhat)*w) * dx
+    LNS += inner(uhat, grad(u0)*w) * dx
+    LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dx
+    LNS -= Prandtl*That*inner(ey,w)*dx
+    LNS -= Prandtl*phat*div(w)*dx
+    LNS -= Prandtl*q*div(uhat)*dx
+    LNS += inner(u0,grad(That)*theta)*dx
+    LNS += inner(uhat,grad(T0)*theta)*dx
+    LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dx
 
     # raise ValueError("LNS form has not been implemented")
     return LNS
@@ -76,14 +75,13 @@ def NavierStokes(param, u0,p0,T0,
     Rayleigh        =  Constant(param.Rayleigh)
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))
     ey              =  as_vector([0,1])
-    dV = dx
-    NS  = inner(grad(u0)*u0, w) * dV
-    NS += Prandtl*one_over_sqrtRA* inner(grad(u0),grad(w))*dV
-    NS -= Prandtl*T0*inner(ey,w)*dV
-    NS -= Prandtl*p0*div(w)*dV
-    NS -= Prandtl*q*div(u0)*dV
-    NS += inner(grad(T0),u0)*theta*dV
-    NS += one_over_sqrtRA*inner(grad(T0),grad(theta))*dV
+    NS  = inner(u0, grad(u0)*w)*dx
+    NS += Prandtl*one_over_sqrtRA* inner(grad(u0),grad(w))*dx
+    NS -= Prandtl*T0*inner(ey,w)*dx
+    NS -= Prandtl*p0*div(w)*dx
+    NS -= Prandtl*q*div(u0)*dx
+    NS += inner(u0, grad(T0))*theta*dx
+    NS += one_over_sqrtRA*inner(grad(T0),grad(theta))*dx
 
     # raise ValueError("NavierStokes variational formulation has not been implemented ...")
     return NS
@@ -112,60 +110,41 @@ def solve_newton_step(mymesh,param,q0,W):
     NS  = NavierStokes(param, u0, p0, T0, w, q, theta)
 
     # Assemble matrix, vector
-    lhs_ = lhs(LNS + NS)
-    rhs_ = rhs(LNS + NS)
+    lhs = assemble(LNS)
+    rhs = assemble(-NS)
 
     # apply LNS boundary conditions (see loadParam.py)...
-    # bc.apply ...
-    bcs = param.define_boundary_conditions_LNS(W)
-    for bc in bcs:
-        bc.apply(dq.vector())
-        # bc.apply(q0.vector())
+    param.define_boundary_conditions_LNS(W)
 
+    [bc.apply(lhs, rhs) for bc in param.bc]
+    [bc.apply(dq.vector()) for bc in param.bc]
+
+    # for bc_ in param.bc:
+    #     bc_.apply(dq.vector())
+    #     bc_.apply(lhs)
+    #     bc_.apply(rhs)
 
     # solve the linear system of equations
-    # solve() ...
-
-    solve(NS == 0, q0, bcs, solver_parameters={
-        "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-    # solve(NS == LNS, dq, bcs, solver_parameters={
-    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-    # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
-    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-
-    # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
-    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-
-    # problem = NonlinearVariationalProblem(LNS, dq, bcs, NS)
-    # solver = NonlinearVariationalSolver(problem)
-    # prm = solver.parameters
-    # # prm['newton_solver']['absolute_tolerance'] = 1E-8
-    # # prm['newton_solver']['relative_tolerance'] = 1E-7
-    # prm['newton_solver']['maximum_iterations'] = 1000
-    # prm['newton_solver']['relaxation_parameter'] = 1e-0
-    # solver.solve()
-
+    # solve(LNS == NS, dq, param.bc)
+    solve(lhs, dq.vector(), rhs)
     # increment the solution vector with a potential relaxation factor
-    # q0.vector()[:] =  q0.vector().get_local() + ...
+    q0.vector()[:] = q0.vector().get_local() + param.alpha*dq.vector().get_local()
 
     # raise ValueError("solve_newton_step not implemented")
 
-    return q0,dq
-
+    return q0, dq
 
 
 def solve_newton(mymesh,param,q0,W):
-    q0,dq = solve_newton_step(mymesh, param, q0, W)
-    # epsilon_N = 2*param.tolerance
-    # i= 0
-    # while epsilon_N > param.tolerance:
-    #     # - newton step
-    #
-    #     # evaluation of the residual epsilon_N = L2 norm of dq ...
-    #
-    #     raise ValueError("solve_newton not implemented")
-    #     print("      step %d\t,eps = %g"%(i,epsilon_N))
-    #     i+=1
+    epsilon_N = 10*param.tolerance
+    i = 0
+    while epsilon_N > param.tolerance:
+        # - newton step
+        q0, dq = solve_newton_step(mymesh, param, q0, W)
+        # evaluation of the residual epsilon_N = L2 norm of dq ...
+        epsilon_N = norm(dq, norm_type="L2")
+        print("      step %d\t,eps = %g"%(i,epsilon_N))
+        i+=1
 
 
 def solveEigenvalueProblem(mymesh,param,q0,W):
@@ -269,7 +248,7 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
 def plot_streamlines_and_isotemperature(param,q0,Wt,filename='defaultname.png'):
     # feel free to change the plotting function :)
 
-    folder = 'Pr_%3.1f/Ra_%f/'%(param.Prandtl,param.Rayleigh)
+    folder = 'Figures/Pr_%3.1f/Ra_%d/'%(param.Prandtl,int(param.Rayleigh))
 
     uv,p,t = q0.split(deepcopy=True)
     psi  = TrialFunction(Wt)
@@ -303,7 +282,8 @@ def plot_streamlines_and_isotemperature(param,q0,Wt,filename='defaultname.png'):
 
     fig,ax = plt.subplots(figsize=(6,6))
     ax.contour(X,Y,PSI,12,colors='k',linewidths=1)
-    ax.contourf(X,Y,T,20)
+    p = ax.contourf(X,Y,T,20)
+    plt.colorbar(p)
     plt.savefig(folder+filename,dpi=100,bb_inches='tight')
 
     plt.close()
