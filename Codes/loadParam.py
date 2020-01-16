@@ -30,8 +30,8 @@ class Param():
 
         # --- parameters for the Newton method ---
         # relaxation parameter
-        self.alpha      =  1       # =1 no relaxation, between 0 and 1: relaxation
-        self.tolerance  =  1e-6    # absolute tolerance
+        self.alpha      =  0.2       # =1 no relaxation, between 0 and 1: relaxation
+        self.tolerance  =  1e-1    # absolute tolerance
 
         # initial value that will be replaced in the function below
         self.bc = None
@@ -47,13 +47,11 @@ class Param():
 
         self.bc = [self.bc0, self.bc1]
 
-        # raise ValueError('LNS boundary conditions not implemented')
-
     def define_boundary_conditions(self,W):
         # for the velocity
         bc0 = DirichletBC(W.sub(0), Constant((0.0, 0.0)), Walls())
         # this is the temperature
         bc1 = DirichletBC(W.sub(2),  Expression('x[0]-0.5', degree=1), Walls())
         bc = [bc0, bc1]
-        # raise ValueError('NS boundary conditions not implemented')
+
         return bc
