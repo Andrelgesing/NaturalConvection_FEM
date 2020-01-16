@@ -56,7 +56,7 @@ def Jacobian_variational_formulation(param,
     Rayleigh        =  Constant(param.Rayleigh)
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))
     ey              = as_vector([0,1])
-<<<<<<< HEAD
+
 
     LNS  = inner(grad(uhat)*u0, w)*dx
     LNS += inner(grad(u0)*uhat, w)*dx
@@ -68,19 +68,6 @@ def Jacobian_variational_formulation(param,
     LNS += inner(uhat,grad(T0))*theta*dx
     LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dx
 
-=======
-    dV = dx
-    LNS  = inner(grad(uhat)*u0, w) * dV
-    LNS += inner(grad(u0)*uhat, w) * dV
-    LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dV
-    LNS -= Prandtl*That*inner(ey,w)*dV
-    LNS -= Prandtl*phat*div(w)*dV
-    # LNS -= Prandtl*q*div(u0+uhat)*dV
-    LNS += inner(u0,grad(That))*theta*dV
-    LNS += inner(uhat,grad(T0))*theta*dV
-    LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dV
-    
->>>>>>> 05ec5321335323e21e6581ea6a5de8016d7c9540
     # raise ValueError("LNS form has not been implemented")
     return LNS
 
@@ -137,42 +124,16 @@ def solve_newton_step(mymesh,param,q0,W):
     #[bc.apply(lhs, rhs) for bc in bcu]
 
     # solve the linear system of equations
-<<<<<<< HEAD
-    #solve( lhs == rhs , dq , bcs=bc , solver_parameters={ "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-    solve( lhs == rhs , dq , bcu , solver_parameters={ "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
+    # solve( lhs, dq.vector(), rhs, bcu)
+    solve( lhs == rhs , dq , bcs=bc , solver_parameters={ "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
+    
+    #solve( lhs == rhs , dq , bcu , solver_parameters={ "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
+    
     # increment the solution vector with a potential relaxation factor
     # q0.vector()[:] =  q0.vector().get_local() + dq.vector().get_local()
 
     raise ValueError("solve_newton_step not implemented")
-
-=======
-    # solve() ...
-
-    solve(NS == 0, q0, bcs, solver_parameters={
-        "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-    # solve(NS == LNS, dq, bcs, solver_parameters={
-    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-    # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
-    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-
-    # solve(lhs_ == rhs_, dq, bcs, solver_parameters={
-    #     "newton_solver": {"relaxation_parameter": 1e-0, "maximum_iterations": 1000, "linear_solver": 'mumps'}})
-
-    # problem = NonlinearVariationalProblem(LNS, dq, bcs, NS)
-    # solver = NonlinearVariationalSolver(problem)
-    # prm = solver.parameters
-    # # prm['newton_solver']['absolute_tolerance'] = 1E-8
-    # # prm['newton_solver']['relative_tolerance'] = 1E-7
-    # prm['newton_solver']['maximum_iterations'] = 1000
-    # prm['newton_solver']['relaxation_parameter'] = 1e-0
-    # solver.solve()
-
-    # increment the solution vector with a potential relaxation factor     
-    # q0.vector()[:] =  q0.vector().get_local() + ... 
     
-    # raise ValueError("solve_newton_step not implemented")
-                 
->>>>>>> 05ec5321335323e21e6581ea6a5de8016d7c9540
     return q0,dq
 
 
