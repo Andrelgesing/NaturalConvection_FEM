@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import scipy.sparse as sp
 import numpy as np
 import timeit
+import os
 import mshr
 
 
@@ -248,7 +249,7 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
 def plot_streamlines_and_isotemperature(param,q0,Wt,filename='defaultname.png'):
     # feel free to change the plotting function :)
 
-    folder = 'Figures/Pr_%3.1f/Ra_%d/'%(param.Prandtl,int(param.Rayleigh))
+    folder = 'Figures/Pr_%3.1f/Ra_%d/Order_%d/'%(param.Prandtl,int(param.Rayleigh), param.order)
 
     uv,p,t = q0.split(deepcopy=True)
     psi  = TrialFunction(Wt)
@@ -284,6 +285,8 @@ def plot_streamlines_and_isotemperature(param,q0,Wt,filename='defaultname.png'):
     ax.contour(X,Y,PSI,12,colors='k',linewidths=1)
     p = ax.contourf(X,Y,T,20)
     plt.colorbar(p)
-    plt.savefig(folder+filename,dpi=100,bb_inches='tight')
+    name = folder+filename
+    os.makedirs(os.path.dirname(name), exist_ok=True)
+    plt.savefig(name,dpi=100,bb_inches='tight')
 
     plt.close()
