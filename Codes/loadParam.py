@@ -26,14 +26,13 @@ class Param():
 
         # number of triangles per side, before refinement
         self.N = 20
-        self.order= 3
+        self.order = 3
 
         # --- parameters for the Newton method ---
         # relaxation parameter
-        self.alpha      =  0.2       # =1 no relaxation, between 0 and 1: relaxation
-        self.tolerance  =  1e-1    # absolute tolerance
+        self.alpha      =  0.8       # =1 no relaxation, between 0 and 1: relaxation
+        self.tolerance  =  2e-2    # absolute tolerance
 
-        # initial value that will be replaced in the function below
         self.bc = None
 
 
@@ -51,7 +50,7 @@ class Param():
         # for the velocity
         bc0 = DirichletBC(W.sub(0), Constant((0.0, 0.0)), Walls())
         # this is the temperature
-        bc1 = DirichletBC(W.sub(2),  Expression('x[0]-0.5', degree=1), Walls())
+        bc1 = DirichletBC(W.sub(2),  Expression('0.5 - x[0]', degree=1), Walls())
         bc = [bc0, bc1]
 
         return bc
