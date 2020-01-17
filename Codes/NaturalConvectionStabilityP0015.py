@@ -33,7 +33,8 @@ for order in [2,3,4,5]:
     V  = VectorElement("CG", mesh_.ufl_cell(), param.order)
     Q  = FiniteElement("CG", mesh_.ufl_cell(), param.order-1)
     VT = FiniteElement("CG", mesh_.ufl_cell(), param.order)
-    W = FunctionSpace(mesh_, MixedElement([V, Q,VT]))
+    W  = FunctionSpace(mesh_, MixedElement([V, Q,VT]))
+   
     # just used for plotting
     Wt= FunctionSpace(mesh_, VT)
     q0 = Function(W)
