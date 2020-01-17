@@ -56,7 +56,7 @@ def Jacobian_variational_formulation(param,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))
-    ey              = as_vector([0,1])
+    ey              =  as_vector([0,1])
     LNS  = inner(u0, grad(uhat)*w) * dx
     LNS += inner(uhat, grad(u0)*w) * dx
     LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dx
@@ -88,7 +88,6 @@ def NavierStokes(param, u0,p0,T0,
     return NS
 
 
-
 def solve_newton_step(mymesh,param,q0,W):
     eigenmode_real, eigenmode_imag = None,None
     egv_real_part      = Function(W)
@@ -103,7 +102,7 @@ def solve_newton_step(mymesh,param,q0,W):
     (u0, p0 , T0) = (as_vector((q0[0], q0[1])), q0[2],q0[3])
 
     dq =  Function(W)
-    #print("number of degrees of freedom: %d"%q0.vector().get_local().shape)
+    print("number of degrees of freedom: %d"%q0.vector().get_local().shape)
 
 
     # Define variational forms
@@ -128,6 +127,7 @@ def solve_newton_step(mymesh,param,q0,W):
     # solve the linear system of equations
     # solve(LNS == NS, dq, param.bc)
     solve(lhs, dq.vector(), rhs)
+    
     # increment the solution vector with a potential relaxation factor
     q0.vector()[:] = q0.vector().get_local() + param.alpha*dq.vector().get_local()
 
@@ -140,8 +140,10 @@ def solve_newton(mymesh,param,q0,W):
     epsilon_N = 10*param.tolerance
     i = 0
     while epsilon_N > param.tolerance:
+        
         # - newton step
         q0, dq = solve_newton_step(mymesh, param, q0, W)
+        
         # evaluation of the residual epsilon_N = L2 norm of dq ...
         epsilon_N = norm(dq, norm_type="L2")
         print("      step %d\t,eps = %g"%(i,epsilon_N))
@@ -166,10 +168,10 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
     (u0, p0 , T0) = (as_vector((q0[0], q0[1])), q0[2],q0[3])
 
     # Define variational forms
-    LNS =  Jacobian_variational_formulation( param, u0, p0, T0 ,uhat, phat, That, w , q, theta  )
-    # m   =  ...
-
-    raise ValueError("Variational forms form the eigenvalue problem are not implemented yet")
+    LNS = Jacobian_variational_formulation( param, u0, p0, T0 ,uhat, phat, That, w , q, theta  )
+    m   =  - inner(uhat, w)*dx - That*theta*dx
+   
+    #raise ValueError("Variational forms form the eigenvalue problem are not implemented yet")
 
     #
     # ---  don't touch the rest of that function  ---
