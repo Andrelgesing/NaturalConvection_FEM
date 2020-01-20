@@ -63,8 +63,8 @@ def Jacobian_variational_formulation(param,
     LNS -= Prandtl*That*inner(ey,w)*dx
     LNS -= Prandtl*phat*div(w)*dx
     LNS -= Prandtl*q*div(uhat)*dx
-    LNS += inner(u0,grad(That)*theta)*dx
-    LNS += inner(uhat,grad(T0)*theta)*dx
+    LNS += inner(u0,grad(That))*theta*dx
+    LNS += inner(uhat,grad(T0))*theta*dx
     LNS += one_over_sqrtRA*inner(grad(That),grad(theta))*dx
 
     # raise ValueError("LNS form has not been implemented")
@@ -102,7 +102,7 @@ def solve_newton_step(mymesh,param,q0,W):
     (u0, p0 , T0) = (as_vector((q0[0], q0[1])), q0[2],q0[3])
 
     dq =  Function(W)
-    print("number of degrees of freedom: %d"%q0.vector().get_local().shape)
+    # print("number of degrees of freedom: %d"%q0.vector().get_local().shape)
 
 
     # Define variational forms
@@ -114,24 +114,15 @@ def solve_newton_step(mymesh,param,q0,W):
     rhs = assemble(-NS)
 
     # apply LNS boundary conditions (see loadParam.py)...
-    param.define_boundary_conditions_LNS(W)
 
     [bc.apply(lhs, rhs) for bc in param.bc]
     [bc.apply(dq.vector()) for bc in param.bc]
 
-    # for bc_ in param.bc:
-    #     bc_.apply(dq.vector())
-    #     bc_.apply(lhs)
-    #     bc_.apply(rhs)
-
     # solve the linear system of equations
-    # solve(LNS == NS, dq, param.bc)
     solve(lhs, dq.vector(), rhs)
     
     # increment the solution vector with a potential relaxation factor
     q0.vector()[:] = q0.vector().get_local() + param.alpha*dq.vector().get_local()
-
-    # raise ValueError("solve_newton_step not implemented")
 
     return q0, dq
 
@@ -145,8 +136,9 @@ def solve_newton(mymesh,param,q0,W):
         q0, dq = solve_newton_step(mymesh, param, q0, W)
         
         # evaluation of the residual epsilon_N = L2 norm of dq ...
-        epsilon_N = norm(dq, norm_type="L2")
-        print("      step %d\t,eps = %g"%(i,epsilon_N))
+        epsilon_N = norm(dq, norm_type="l2", mesh=mymesh)
+        if i % 10 == 0:
+            print("      step %d\t,eps = %g"%(i,epsilon_N))
         i+=1
 
 
@@ -232,16 +224,21 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
     (ur,pr,thetar) = egv_real_part.split(deepcopy=True)
     (ui,pi,thetai) = egv_imag_part.split(deepcopy=True)
 
-    folder = 'Pr_%3.1f/Ra_%f/'%(param.Prandtl,param.Rayleigh)
-    File(folder+"realPart_Vel.pvd") <<  ur
-    File(folder+"imagPart_Vel.pvd") <<  ui
-    File(folder+"realPart_theta.pvd") <<  thetar
-    File(folder+"imagPart_theta.pvd") <<  thetai
+    folder = 'Data/Pr_%1.3f/Ra_%d/Order_%d/' % (param.Prandtl, int(param.Rayleigh), param.order)
+    # folder = 'Pr_%3.1f/Ra_%f/'%(param.Prandtl,param.Rayleigh)
+    # File(folder+"realPart_Vel.pvd") <<  ur
+    # File(folder+"imagPart_Vel.pvd") <<  ui
+    # File(folder+"realPart_theta.pvd") <<  thetar
+    # File(folder+"imagPart_theta.pvd") <<  thetai
+    name = folder+"eigenvalues.csv"
+    os.makedirs(os.path.dirname(name), exist_ok=True)
+    np.savetxt(name,eigenvalues, delimiter=',')
+    np.savetxt(folder+"realPart.csv",egv_real_part.vector().get_local(), delimiter=',')
+    np.savetxt(folder+"imagPart.csv",egv_imag_part.vector().get_local(), delimiter=',')
 
-    np.save(folder+"eigenvalues",eigenvalues)
-    np.save(folder+"realPart",egv_real_part.vector().get_local())
-    np.save(folder+"imagPart",egv_imag_part.vector().get_local())
-
+    # np.savetxt(folder+"eigenvalues.csv",eigenvalues, delimeter=',')
+    # np.save(folder+"realPart.csv",egv_real_part.vector().get_local())
+    # np.save(folder+"imagPart.csv",egv_imag_part.vector().get_local())
 
     return eigenvalues, egv_real_part, egv_imag_part
 
@@ -251,7 +248,7 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
 def plot_streamlines_and_isotemperature(param,q0,Wt,filename='defaultname.png'):
     # feel free to change the plotting function :)
 
-    folder = 'Figures/Pr_%3.1f/Ra_%d/Order_%d/'%(param.Prandtl,int(param.Rayleigh), param.order)
+    folder = 'Figures/Pr_%1.3f/Ra_%d/Order_%d/'%(param.Prandtl,int(param.Rayleigh), param.order)
 
     uv,p,t = q0.split(deepcopy=True)
     psi  = TrialFunction(Wt)
