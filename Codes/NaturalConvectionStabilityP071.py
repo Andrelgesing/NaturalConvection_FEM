@@ -42,7 +42,7 @@ for order in [2,3,4,5]:
         bc.apply(q0.vector())
 
     # one needs to go progessively to high Rayleigh number
-    for Ra in [1e2, 1e3,1e4,1e5,2e5, 1e6]:
+    for Ra in [1e2, 1e3, 5e3, 1e4, 5e4, 1e5, 5e5, 1e6]:
         param.Rayleigh = Ra
         print('---- Ra = %d --'%param.Rayleigh)
         solve_newton(mesh_,param,q0,W)
