@@ -49,12 +49,12 @@ for order in [2,3,4,5]:
     # one needs to go progessively to high Rayleigh number
     for Ra in [1e4,2e4,3e4]:
         param.Rayleigh = Ra
-        print('---- Ra = %f --'%param.Rayleigh)
+        print('---- Ra = %d --'%param.Rayleigh)
         solve_newton(mesh_,param,q0,W)
         
     for Ra in [35000,40000,45000,50000 ]: # you may change the numbers :)
         param.Rayleigh = Ra
-        print('---- Ra = %f --'%param.Rayleigh)
+        print('---- Ra = %d --'%param.Rayleigh)
         solve_newton(mesh_,param,q0,W)
         eigenvalues, egv_real_part, egv_imag_part  = solveEigenvalueProblem(mesh_,param,q0,W)
         
@@ -63,6 +63,6 @@ for order in [2,3,4,5]:
         plot_streamlines_and_isotemperature(param,egv_imag_part,Wt,filename='imag_part.png')        
 
 # plot temperature
-plot(q0[3])
-plt.show(block=True)
+# plot(q0[3])
+# plt.show(block=True)
 

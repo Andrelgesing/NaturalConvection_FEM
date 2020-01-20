@@ -15,11 +15,10 @@ parameters["refinement_algorithm"] = "plaza_with_parent_facets"
 #%% -- 
 param = Param()
 param.Prandtl = 0.71
-# for order in [2,3,4,5]:
-for order in [2]:
+for order in [2,3,4,5]:
+# for order in [2]:
     mesh_ =  generate_mesh(param)
     # plot(mesh_)
-    # plt.show()
     # plt.show(block=True)
 
     
@@ -43,23 +42,23 @@ for order in [2]:
         bc.apply(q0.vector())
 
     # one needs to go progessively to high Rayleigh number
-    for Ra in [1e4,1e5,2e5, 1e6]:
+    for Ra in [1e2, 1e3,1e4,1e5,2e5, 1e6]:
         param.Rayleigh = Ra
-        print('---- Ra = %f --'%param.Rayleigh)
+        print('---- Ra = %d --'%param.Rayleigh)
         solve_newton(mesh_,param,q0,W)
         plot_streamlines_and_isotemperature(param, q0, Wt, filename='baseflow.png')
         
     for Ra in [2.1e6,2.2e6,2.3e6,2.4e6, 2.5e6 ,2.6e6  ]:
         param.Rayleigh = Ra
-        print('---- Ra = %f --'%param.Rayleigh)
+        print('---- Ra = %d --'%param.Rayleigh)
         solve_newton(mesh_,param,q0,W)
-        # eigenvalues, egv_real_part, egv_imag_part  = solveEigenvalueProblem(mesh_,param,q0,W)
+        eigenvalues, egv_real_part, egv_imag_part  = solveEigenvalueProblem(mesh_,param,q0,W)
         
         plot_streamlines_and_isotemperature(param,q0,Wt,filename='baseflow.png')
-        # plot_streamlines_and_isotemperature(param,egv_real_part,Wt,filename='real_part.png')
-        # plot_streamlines_and_isotemperature(param,egv_imag_part,Wt,filename='imag_part.png')
+        plot_streamlines_and_isotemperature(param,egv_real_part,Wt,filename='real_part.png')
+        plot_streamlines_and_isotemperature(param,egv_imag_part,Wt,filename='imag_part.png')
 
 # plot temperature
-plot(q0[3])
-plt.show(block=True)
+# plot(q0[3])
+# plt.show(block=True)
 
