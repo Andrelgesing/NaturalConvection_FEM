@@ -164,7 +164,7 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
 
     # Define variational forms
     LNS = Jacobian_variational_formulation( param, u0, p0, T0 ,uhat, phat, That, w , q, theta  )
-    m   =  - inner(uhat, w)*dx - That*theta*dx
+    m   =  + inner(uhat, w)*dx + That*theta*dx
 
 
     #
@@ -174,12 +174,11 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
     A, M = PETScMatrix(),  PETScMatrix()
 
     # assemble the matrices
-    assemble(LNS, tensor=A)
+    assemble(-LNS, tensor=A)
     assemble(m, tensor=M)
 
 
     # applying the dirichlet boundary conditions on all the tensors
-
     for bc_ in param.bc:
         bc_.apply(A)
         bc_.apply(M)
