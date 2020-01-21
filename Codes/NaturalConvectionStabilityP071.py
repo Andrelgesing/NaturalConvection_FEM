@@ -48,7 +48,7 @@ for order in [2,3,4,5]:
         solve_newton(mesh_,param,q0,W)
         plot_streamlines_and_isotemperature(param, q0, Wt, filename='baseflow.png')
         
-    for Ra in [2.1e6,2.2e6,2.3e6,2.4e6, 2.5e6 ,2.6e6  ]:
+    for Ra in [1.9e6, 2.0e6, 2.1e6,2.2e6,2.3e6,2.4e6, 2.5e6 ,2.6e6  ]:
         param.Rayleigh = Ra
         print('---- Ra = %d --'%param.Rayleigh)
         solve_newton(mesh_,param,q0,W)
