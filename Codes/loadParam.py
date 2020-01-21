@@ -26,12 +26,12 @@ class Param():
 
         # number of triangles per side, before refinement
         self.N = 20
-        self.order = 2
+        self.order = 3
 
         # --- parameters for the Newton method ---
         # relaxation parameter
         self.alpha      =  0.8       # =1 no relaxation, between 0 and 1: relaxation
-        self.tolerance  =  1e-3    # absolute tolerance
+        self.tolerance  =  1e-6    # absolute tolerance
 
         self.bc = None
 
