@@ -19,7 +19,7 @@ def refine_mesh_close_to_borders(mesh):
     alpha_v = [ 0.05, 0.01, 0.005 ]
 
     for alpha in alpha_v:
-        cell_markers = MeshFunction("bool", mesh, 2)
+        cell_markers = MeshFunction("bool", mesh, dim=2)
         cell_markers.set_all(False)
 
         for cell in cells(mesh):
@@ -56,9 +56,9 @@ def Jacobian_variational_formulation(param,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))
-    ey              =  as_vector([0,1])
-    LNS  = inner(u0, grad(uhat)*w) * dx
-    LNS += inner(uhat, grad(u0)*w) * dx
+    ey              =  as_vector((0,1))
+    LNS  = inner(grad(uhat)*u0, w) * dx
+    LNS += inner(grad(u0)*uhat, w) * dx
     LNS += Prandtl*one_over_sqrtRA* inner(grad(uhat),grad(w))*dx
     LNS -= Prandtl*That*inner(ey,w)*dx
     LNS -= Prandtl*phat*div(w)*dx
@@ -75,8 +75,8 @@ def NavierStokes(param, u0,p0,T0,
     Prandtl         =  Constant(param.Prandtl)
     Rayleigh        =  Constant(param.Rayleigh)
     one_over_sqrtRA =  Constant(1.0/np.sqrt(param.Rayleigh))
-    ey              =  as_vector([0,1])
-    NS  = inner(u0, grad(u0)*w)*dx
+    ey              =  as_vector((0,1))
+    NS  = inner(grad(u0)*u0, w)*dx
     NS += Prandtl*one_over_sqrtRA* inner(grad(u0),grad(w))*dx
     NS -= Prandtl*T0*inner(ey,w)*dx
     NS -= Prandtl*p0*div(w)*dx
@@ -114,7 +114,9 @@ def solve_newton_step(mymesh,param,q0,W):
     rhs = assemble(-NS)
 
     # apply LNS boundary conditions (see loadParam.py)...
-
+    # bcs = param.define_boundary_conditions(W)
+    # [bc.apply(rhs) for bc in bcs]
+    # [bc.apply(lhs) for bc in param.bc]
     [bc.apply(lhs, rhs) for bc in param.bc]
     [bc.apply(dq.vector()) for bc in param.bc]
 
@@ -136,9 +138,10 @@ def solve_newton(mymesh,param,q0,W):
         q0, dq = solve_newton_step(mymesh, param, q0, W)
         
         # evaluation of the residual epsilon_N = L2 norm of dq ...
-        epsilon_N = norm(dq, norm_type="l2", mesh=mymesh)
-        if i % 10 == 0:
-            print("      step %d\t,eps = %g"%(i,epsilon_N))
+        epsilon_N = sqrt(assemble((dq[0]*dq[0]  + dq[1]*dq[1] + dq[3]*dq[3])* dx ))
+        # epsilon_N = norm(dq, norm_type="l2", mesh=mymesh)
+        # if i % 10 == 0:
+        print("      step %d\t,eps = %g"%(i,epsilon_N))
         i+=1
 
 
@@ -162,8 +165,7 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
     # Define variational forms
     LNS = Jacobian_variational_formulation( param, u0, p0, T0 ,uhat, phat, That, w , q, theta  )
     m   =  - inner(uhat, w)*dx - That*theta*dx
-   
-    #raise ValueError("Variational forms form the eigenvalue problem are not implemented yet")
+
 
     #
     # ---  don't touch the rest of that function  ---
@@ -172,11 +174,12 @@ def solveEigenvalueProblem(mymesh,param,q0,W):
     A, M = PETScMatrix(),  PETScMatrix()
 
     # assemble the matrices
-    assemble(-LNS, tensor=A)
+    assemble(LNS, tensor=A)
     assemble(m, tensor=M)
 
 
     # applying the dirichlet boundary conditions on all the tensors
+
     for bc_ in param.bc:
         bc_.apply(A)
         bc_.apply(M)
